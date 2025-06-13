@@ -76,6 +76,7 @@ public class Elevator extends SubsystemBase {
     SmartDashboard.putBoolean("Top_Sensor_Value", getTopSensor());
     SmartDashboard.putBoolean("Bottom_Sensor_Value", getBottomSensor());
     SmartDashboard.putNumber("Elevator Voltage",getVoltage());
+    SmartDashboard.putNumber("Elevator_Velocity",getVelocity());
     // This method will be called once per scheduler run
   }
 }

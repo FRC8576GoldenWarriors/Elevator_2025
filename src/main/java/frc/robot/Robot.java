@@ -67,9 +67,9 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
-    if (!RobotContainer.elevator.getBottomSensor()) {
-      Macros.elevatorReset(RobotContainer.elevator).schedule();
-    }
+    // if (!RobotContainer.elevator.getBottomSensor()) {
+    //   Macros.elevatorReset(RobotContainer.elevator).schedule();
+    // }
   
       // new Trigger(()->!RobotContainer.elevator.getBottomSensor()&&DriverStation.getMatchTime()>125).onTrue(Macros.elevatorReset(RobotContainer.elevator));
     }

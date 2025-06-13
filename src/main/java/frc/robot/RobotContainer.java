@@ -31,7 +31,7 @@ public class RobotContainer {
     DRIVE_CONTROLLER.povUp().onTrue(new InstantCommand(()->elevator.zeroEncoder()));
     DRIVE_CONTROLLER.y().onTrue(new ElevatorMove(elevator, 4));
     DRIVE_CONTROLLER.b().onTrue(new ElevatorMove(elevator,5.5));
-    DRIVE_CONTROLLER.povDown().whileTrue(new StartEndCommand(()->elevator.setSpeed(.1),()->elevator.setSpeed(0),elevator));
+    DRIVE_CONTROLLER.povDown().whileTrue(new StartEndCommand(()->elevator.setSpeed(-.1),()->elevator.setSpeed(0),elevator));
   }
 
   public Command getAutonomousCommand() {

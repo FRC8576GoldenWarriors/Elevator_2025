@@ -37,7 +37,7 @@ public class ElevatorMove extends Command {
     PID.setTolerance(15);
     // PID = new PIDController(Constants.ElevatorConstants.kP, Constants.ElevatorConstants.kI, Constants.ElevatorConstants.kD);
     // PID.setTolerance(10);
-    FEED_FORWARD = new ElevatorFeedforward(Constants.ElevatorConstants.kS, Constants.ElevatorConstants.kG, Constants.ElevatorConstants.kA);
+    FEED_FORWARD = new ElevatorFeedforward(Constants.ElevatorConstants.kS, Constants.ElevatorConstants.kG, Constants.ElevatorConstants.kV,Constants.ElevatorConstants.kA);
     SmartDashboard.putNumber("PID Voltage",PID_VOLTAGE);
     SmartDashboard.putNumber("FeedForward Voltage",FEEDFORWARD_VOLTAGE);
     SmartDashboard.putNumber("Input voltage",INPUT_VOLTAGE);
