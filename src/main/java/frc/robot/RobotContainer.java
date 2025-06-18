@@ -12,10 +12,12 @@ import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Commands.ElevatorMove;
+import frc.robot.Commands.ElevatorMove;
 import frc.robot.Subsystems.Elevator;
+import frc.robot.Subsystems.ElevatorIOSparkMax;
 
 public class RobotContainer {
-  public static final Elevator elevator = new Elevator();
+  public static final Elevator elevator = new Elevator(new ElevatorIOSparkMax());
   public static final CommandXboxController DRIVE_CONTROLLER = new CommandXboxController(0);
   public RobotContainer() {
     configureBindings();
@@ -24,14 +26,14 @@ public class RobotContainer {
   private void configureBindings() {
     DRIVE_CONTROLLER.a().onTrue(new ElevatorMove(elevator,1.5));
     DRIVE_CONTROLLER.x().onTrue(new ElevatorMove(elevator, 3));
-    // DRIVE_CONTROLLER.x().whileTrue(elevator.quasRoutine(Direction.kForward));
-    // DRIVE_CONTROLLER.a().whileTrue(elevator.quasRoutine(Direction.kReverse));
-    // DRIVE_CONTROLLER.y().whileTrue(elevator.dynamicRoutine(Direction.kForward));
-    // DRIVE_CONTROLLER.b().whileTrue(elevator.dynamicRoutine(Direction.kReverse));
+    // // DRIVE_CONTROLLER.x().whileTrue(elevator.quasRoutine(Direction.kForward));
+    // // DRIVE_CONTROLLER.a().whileTrue(elevator.quasRoutine(Direction.kReverse));
+    // // DRIVE_CONTROLLER.y().whileTrue(elevator.dynamicRoutine(Direction.kForward));
+    // // DRIVE_CONTROLLER.b().whileTrue(elevator.dynamicRoutine(Direction.kReverse));
     DRIVE_CONTROLLER.povUp().onTrue(new InstantCommand(()->elevator.zeroEncoder()));
     DRIVE_CONTROLLER.y().onTrue(new ElevatorMove(elevator, 4));
-    DRIVE_CONTROLLER.b().onTrue(new ElevatorMove(elevator,5.5));
-    DRIVE_CONTROLLER.povDown().whileTrue(new StartEndCommand(()->elevator.setSpeed(-.1),()->elevator.setSpeed(0),elevator));
+    DRIVE_CONTROLLER.b().onTrue(new ElevatorMove(elevator,5.1));
+    // DRIVE_CONTROLLER.povDown().whileTrue(new StartEndCommand(()->elevator.setSpeed(-.1),()->elevator.setSpeed(0),elevator));
   }
 
   public Command getAutonomousCommand() {

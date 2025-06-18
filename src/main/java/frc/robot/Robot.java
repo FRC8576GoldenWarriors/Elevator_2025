@@ -4,21 +4,18 @@
 
 package frc.robot;
 
-import org.littletonrobotics.urcl.URCL;
-
 import edu.wpi.first.wpilibj.DataLogManager;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.PowerDistribution;
+import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.StartEndCommand;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
+import org.littletonrobotics.junction.LoggedRobot;
+import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.NT4Publisher;
+import org.littletonrobotics.junction.wpilog.WPILOGWriter;
+import org.littletonrobotics.urcl.URCL;
 
-public class Robot extends TimedRobot {
+public class Robot extends LoggedRobot {
   private Command m_autonomousCommand;
 
   private final RobotContainer m_robotContainer;
@@ -26,11 +23,32 @@ public class Robot extends TimedRobot {
   public Robot() {
     m_robotContainer = new RobotContainer();
   }
+
   @Override
-  public void robotInit(){
-    DataLogManager.start();
-    URCL.start();
- }
+  public void robotInit() {
+    Logger.recordMetadata("Goldfish", "Goldfish"); // Set a metadata value
+
+    if (isReal()) {
+      Logger.addDataReceiver(new WPILOGWriter()); // Log to a USB stick ("/U/logs")
+      Logger.addDataReceiver(new NT4Publisher()); // Publish data to NetworkTables
+      new PowerDistribution(1, ModuleType.kRev); // Enables power distribution logging
+    }
+    // } else {
+    //   setUseTiming(false); // Run as fast as possible
+    //   String logPath =
+    //       LogFileUtil
+    //           .findReplayLog(); // Pull the replay log from AdvantageScope (or prompt the user)
+    //   Logger.setReplaySource(new WPILOGReader(logPath)); // Read replay log
+    //   Logger.addDataReceiver(
+    //       new WPILOGWriter(
+    //           LogFileUtil.addPathSuffix(logPath, "_sim"))); // Save outputs to a new log
+    // }
+
+    Logger.start(); // Start logging! No more data receivers, replay sources, or metadata values may
+    // be added.
+    // DataLogManager.start();
+    // URCL.start();
+  }
 
   @Override
   public void robotPeriodic() {
@@ -48,7 +66,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
-    
+
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     if (m_autonomousCommand != null) {
@@ -70,13 +88,16 @@ public class Robot extends TimedRobot {
     // if (!RobotContainer.elevator.getBottomSensor()) {
     //   Macros.elevatorReset(RobotContainer.elevator).schedule();
     // }
-  
-      // new Trigger(()->!RobotContainer.elevator.getBottomSensor()&&DriverStation.getMatchTime()>125).onTrue(Macros.elevatorReset(RobotContainer.elevator));
-    }
+
+    // new
+    //
+    // Trigger(()->!RobotContainer.elevator.getBottomSensor()&&DriverStation.getMatchTime()>125).onTrue(Macros.elevatorReset(RobotContainer.elevator));
+  }
 
   @Override
   public void teleopPeriodic() {
-    SmartDashboard.putBoolean("Command Scheduled",Macros.elevatorReset(RobotContainer.elevator).isScheduled());
+    // SmartDashboard.putBoolean(
+    //     "Command Scheduled", Macros.elevatorReset(RobotContainer.elevator).isScheduled());
   }
 
   @Override
