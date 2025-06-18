@@ -6,6 +6,7 @@ package frc.robot.Commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Subsystems.Elevator;
+import frc.robot.Subsystems.Elevator.levels;
 
 /* You should consider using the more terse Command factories API instead
 https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
@@ -13,7 +14,7 @@ public class ElevatorMove extends Command {
   /** Creates a new ElevatorMove. */
   private Elevator elevator;
 
-  private double position;
+  private levels level;
 
   //   private ProfiledPIDController PID;
   //   // private PIDController PID;
@@ -22,11 +23,11 @@ public class ElevatorMove extends Command {
   //   private double FEEDFORWARD_VOLTAGE;
   //   private double INPUT_VOLTAGE;
 
-  public ElevatorMove(Elevator elevator, double position) {
+  public ElevatorMove(Elevator elevator, Elevator.levels level) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.elevator = elevator;
 
-    this.position = position * 69.2355; // convert to rotations
+    this.level = level; // convert to rotations
     // PID =
     //     new ProfiledPIDController(
     //         Constants.ElevatorConstants.kP,
@@ -56,13 +57,13 @@ public class ElevatorMove extends Command {
   @Override
   public void initialize() {
     elevator.resetPID();
+    elevator.setWantedLevel(level);
     // PID.reset(elevator.getEncoderPosition(), 0);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    elevator.setWantedPosition(position);
     // PID_VOLTAGE = PID.calculate(elevator.getEncoderPosition(), position);
     // FEEDFORWARD_VOLTAGE = FEED_FORWARD.calculate(10, 15);
     // INPUT_VOLTAGE = PID_VOLTAGE + FEEDFORWARD_VOLTAGE;
@@ -83,7 +84,7 @@ public class ElevatorMove extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    elevator.setWantedPosition(-1);
+    elevator.setWantedLevel(levels.Idle);
     // elevator.setVoltage(0.0);
     return;
   }

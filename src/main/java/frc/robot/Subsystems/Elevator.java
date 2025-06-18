@@ -24,6 +24,14 @@ public class Elevator extends SubsystemBase {
   //         new SysIdRoutine.Mechanism((voltage) -> this.setVoltage(voltage.in(Volts)), null,
   // this));
 
+  public enum levels{
+    L1,
+    L2,
+    L3,
+    L4,
+    Idle,
+    Zero
+  }
   private ElevatorIO io;
 
   private double PID_Voltage;
@@ -33,9 +41,11 @@ public class Elevator extends SubsystemBase {
   private ElevatorFeedforward FEED_FORWARD;
   private ElevatorIOInputsAutoLogged inputs = new ElevatorIOInputsAutoLogged();
 
-  private double wantedPosition;
+  // private double wantedPosition;
   private double currentPosition;
 
+  // private levels currentLevel = levels.Idle;
+  private levels wantedLevel = levels.Idle;
   public Elevator(ElevatorIO io) {
     // TOP_SENSOR = new DigitalInput(Constants.ElevatorConstants.TOP_SENSOR_ID);
     // BOTTOM_SENSOR = new DigitalInput(Constants.ElevatorConstants.BOTTOM_SENSOR_ID);
@@ -59,7 +69,7 @@ public class Elevator extends SubsystemBase {
             Constants.ElevatorConstants.kA);
     this.io = io;
     currentPosition = inputs.encoderValue;
-    wantedPosition = -1;
+    // wantedPosition = -1;
   }
 
   @Override
@@ -67,20 +77,50 @@ public class Elevator extends SubsystemBase {
     io.updateInputs(inputs);
     Logger.processInputs("Elevator", inputs);
     currentPosition = inputs.encoderValue;
+    
     // prevent elevator from moving after instantiated
-    if (wantedPosition >= 0&&(getEncoderPosition()<220||!getTopSensor())) {
-      PID_Voltage = PID.calculate(currentPosition, wantedPosition);
-      FF_Voltage = FEED_FORWARD.calculate(10, 15);
+    if ((getEncoderPosition()<220||!getTopSensor())&&wantedLevel!=levels.Zero) {
+      switch(wantedLevel){
+        
+        case L1:
+          PID_Voltage = PID.calculate(currentPosition,Constants.ElevatorConstants.L1Position);
+          FF_Voltage = FEED_FORWARD.calculate(10, 15);
+          break;
+        case L2:
+          PID_Voltage = PID.calculate(currentPosition,Constants.ElevatorConstants.L2Position);
+          FF_Voltage = FEED_FORWARD.calculate(10, 15);
+          break;
+        case L3:
+          PID_Voltage = PID.calculate(currentPosition,Constants.ElevatorConstants.L3Position);
+          FF_Voltage = FEED_FORWARD.calculate(10, 15);
+          break;
+        case L4:
+          PID_Voltage = PID.calculate(currentPosition,Constants.ElevatorConstants.L4Position);
+          FF_Voltage = FEED_FORWARD.calculate(10, 15);
+          break;
+        case Idle:
+          PID_Voltage = 0;
+          FF_Voltage = 0;
+      }
+      // PID_Voltage = PID.calculate(currentPosition, wantedPosition);
       Input_Voltage = PID_Voltage + FF_Voltage;
       io.setVoltage(Input_Voltage);
-    } else {
-      io.setVoltage(0);
+    } 
+    else{
+      io.setSpeed(-0.2);
+      if(inputs.Bottom_Sensor_Value){
+        io.setSpeed(0);
+        zeroEncoder();
+        wantedLevel = levels.Idle;
+      }
     }
-    SmartDashboard.putBoolean("Bottom_Sensor", getBottomSensor());
   }
 
-  public void setWantedPosition(double position) {
-    wantedPosition = position; // rotations
+  // public void setWantedPosition(double position) {
+  //   wantedPosition = position; // rotations
+  // }
+  public void setWantedLevel(levels level){
+    wantedLevel = level;
   }
 
   public void resetPID() {
