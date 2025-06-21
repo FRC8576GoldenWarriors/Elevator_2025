@@ -8,8 +8,15 @@ import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
+
+import static edu.wpi.first.units.Units.Volts;
+
+import java.time.chrono.ThaiBuddhistChronology;
+
 import org.littletonrobotics.junction.Logger;
 
 public class Elevator extends SubsystemBase {
@@ -33,7 +40,7 @@ public class Elevator extends SubsystemBase {
     Zero
   }
   private ElevatorIO io;
-
+  
   private double PID_Voltage;
   private double FF_Voltage;
   private double Input_Voltage;
@@ -46,6 +53,21 @@ public class Elevator extends SubsystemBase {
 
   // private levels currentLevel = levels.Idle;
   private levels wantedLevel = levels.Idle;
+  public SysIdRoutine routine = new SysIdRoutine(new SysIdRoutine.Config(
+    null,null,null,
+    (state)->Logger.recordOutput("SysIdState",state.toString())
+  ), new SysIdRoutine.Mechanism((voltage)->io.setVoltage(voltage.in(Volts)), null, this));
+  // var sysIdRoutine = new SysIdRoutine(
+  //   new SysIdRoutine.Config(
+  //     null, null, null, // Use default config
+  //     (state) -> Logger.recordOutput("SysIdTestState", state.toString())
+  //   ),
+  //   new SysIdRoutine.Mechanism(
+  //     (voltage) -> subsystem.runVolts(voltage.in(Volts)),
+  //     null, // No log consumer, since data is recorded by AdvantageKit
+  //     subsystem
+  //   )
+  // );
   public Elevator(ElevatorIO io) {
     // TOP_SENSOR = new DigitalInput(Constants.ElevatorConstants.TOP_SENSOR_ID);
     // BOTTOM_SENSOR = new DigitalInput(Constants.ElevatorConstants.BOTTOM_SENSOR_ID);
@@ -77,7 +99,6 @@ public class Elevator extends SubsystemBase {
     io.updateInputs(inputs);
     Logger.processInputs("Elevator", inputs);
     currentPosition = inputs.encoderValue;
-    
     // prevent elevator from moving after instantiated
     if ((getEncoderPosition()<220||!getTopSensor())&&wantedLevel!=levels.Zero) {
       switch(wantedLevel){
@@ -175,6 +196,13 @@ public class Elevator extends SubsystemBase {
   public double getVelocity() {
     return inputs.motorVelocity;
   }
+  public Command IDqualatistic(SysIdRoutine.Direction direction){
+    return routine.quasistatic(direction);
+  }
+  public Command IDDynamic(SysIdRoutine.Direction direction){
+    return routine.dynamic(direction);
+  }
+
 
   // @Override
   // public void periodic() {
