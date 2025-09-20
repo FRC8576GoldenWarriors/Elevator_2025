@@ -52,6 +52,7 @@ public class Robot extends LoggedRobot {
     // be added.
     // DataLogManager.start();
     // URCL.start();
+    //RobotContainer.elevator.zeroEncoder();
   }
 
   @Override
@@ -89,9 +90,9 @@ public class Robot extends LoggedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
-    if (!RobotContainer.elevator.getBottomSensor()) {
-    new ElevatorMove(RobotContainer.elevator, levels.Zero).schedule();
-    }
+    // if (!RobotContainer.elevator.getBottomSensor()) {
+    // new ElevatorMove(RobotContainer.elevator, levels.Zero).schedule();
+    // }
     // if (!RobotContainer.elevator.getBottomSensor()) {
     //   Macros.elevatorReset(RobotContainer.elevator).schedule();
     // }

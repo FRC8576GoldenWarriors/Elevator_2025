@@ -5,16 +5,22 @@
 package frc.robot.Subsystems;
 
 import edu.wpi.first.math.controller.ElevatorFeedforward;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
+import frc.robot.RobotContainer;
 
+import static edu.wpi.first.units.Units.Volt;
 import static edu.wpi.first.units.Units.Volts;
 
+import java.awt.dnd.DragGestureEvent;
 import java.time.chrono.ThaiBuddhistChronology;
 
 import org.littletonrobotics.junction.Logger;
@@ -37,14 +43,15 @@ public class Elevator extends SubsystemBase {
     L3,
     L4,
     Idle,
-    Zero
+    Zero,
+    VoltageControl
   }
   private ElevatorIO io;
   
   private double PID_Voltage;
   private double FF_Voltage;
   private double Input_Voltage;
-  private ProfiledPIDController PID;
+  private PIDController PID;
   private ElevatorFeedforward FEED_FORWARD;
   private ElevatorIOInputsAutoLogged inputs = new ElevatorIOInputsAutoLogged();
 
@@ -77,12 +84,12 @@ public class Elevator extends SubsystemBase {
     // IdleMode.kCoast);
     // ELEVATOR_ENCODER = ELEVATOR_MOTOR.getEncoder();
     PID =
-        new ProfiledPIDController(
+        new PIDController(
             Constants.ElevatorConstants.kP,
             Constants.ElevatorConstants.kI,
-            Constants.ElevatorConstants.kD,
-            new TrapezoidProfile.Constraints(400, 500));
-    PID.setTolerance(15);
+            Constants.ElevatorConstants.kD);//(400, 500));
+    PID.setTolerance(50);
+    
     FEED_FORWARD =
         new ElevatorFeedforward(
             Constants.ElevatorConstants.kS,
@@ -90,7 +97,7 @@ public class Elevator extends SubsystemBase {
             Constants.ElevatorConstants.kV,
             Constants.ElevatorConstants.kA);
     this.io = io;
-    currentPosition = inputs.encoderValue;
+    currentPosition = inputs.thruBoreValue;
     // wantedPosition = -1;
   }
 
@@ -98,36 +105,70 @@ public class Elevator extends SubsystemBase {
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("Elevator", inputs);
-    currentPosition = inputs.encoderValue;
+    currentPosition = inputs.thruBoreValue;
     // prevent elevator from moving after instantiated
-    if ((getEncoderPosition()<220||!getTopSensor())&&wantedLevel!=levels.Zero) {
+    if ((getEncoderPosition()<4000||!getTopSensor())&&wantedLevel!=levels.Zero&&DriverStation.isEnabled()&&wantedLevel!=levels.VoltageControl) {
       switch(wantedLevel){
-        
         case L1:
+          if(Math.abs(Constants.ElevatorConstants.L1Position-currentPosition)<50)
+          PID.setP(0.03);//0.01
           PID_Voltage = PID.calculate(currentPosition,Constants.ElevatorConstants.L1Position);
+          Logger.recordOutput("Goal Position", Constants.ElevatorConstants.L1Position);
           FF_Voltage = FEED_FORWARD.calculate(10, 15);
           break;
         case L2:
+        if(Math.abs(Constants.ElevatorConstants.L2Position-currentPosition)<50)
+          PID.setP(0.03);
           PID_Voltage = PID.calculate(currentPosition,Constants.ElevatorConstants.L2Position);
+          Logger.recordOutput("Goal Position", Constants.ElevatorConstants.L2Position);
           FF_Voltage = FEED_FORWARD.calculate(10, 15);
           break;
         case L3:
+        if(Math.abs(Constants.ElevatorConstants.L3Position-currentPosition)<50)
+          PID.setP(0.03);
           PID_Voltage = PID.calculate(currentPosition,Constants.ElevatorConstants.L3Position);
+          Logger.recordOutput("Goal Position", Constants.ElevatorConstants.L3Position);
           FF_Voltage = FEED_FORWARD.calculate(10, 15);
           break;
         case L4:
+        if(Math.abs(Constants.ElevatorConstants.L4Position-currentPosition)<50)
+          PID.setP(0.03);
           PID_Voltage = PID.calculate(currentPosition,Constants.ElevatorConstants.L4Position);
+          Logger.recordOutput("Goal Position", Constants.ElevatorConstants.L4Position);
           FF_Voltage = FEED_FORWARD.calculate(10, 15);
           break;
         case Idle:
           PID_Voltage = 0;
           FF_Voltage = 0;
+          break;
+        
       }
+      Logger.recordOutput("PID Voltage", PID_Voltage);
+      Logger.recordOutput("FF Voltage", FF_Voltage);
+      
       // PID_Voltage = PID.calculate(currentPosition, wantedPosition);
       Input_Voltage = PID_Voltage + FF_Voltage;
+      Logger.recordOutput("Input Voltage", Input_Voltage);
+      Logger.recordOutput("Wanted State",wantedLevel);
       io.setVoltage(Input_Voltage);
     } 
     else{
+      if(wantedLevel==levels.VoltageControl){
+        
+          if(RobotContainer.DRIVE_CONTROLLER.povLeft().getAsBoolean()) {
+            io.setSpeed(0.3);
+          }
+
+          else if(RobotContainer.DRIVE_CONTROLLER.povDown().getAsBoolean()) {
+            io.setSpeed(-0.3);
+          }
+          else{
+            io.setSpeed(0);
+          }
+
+
+      }
+      if(wantedLevel==levels.Zero){
       io.setSpeed(-0.2);
       if(inputs.Bottom_Sensor_Value){
         io.setSpeed(0);
@@ -135,17 +176,22 @@ public class Elevator extends SubsystemBase {
         wantedLevel = levels.Idle;
       }
     }
+    if(DriverStation.isDisabled()){
+      wantedLevel = levels.Idle;
+    }
+    }
   }
 
   // public void setWantedPosition(double position) {
   //   wantedPosition = position; // rotations
   // }
   public void setWantedLevel(levels level){
+    resetPID();
     wantedLevel = level;
   }
 
   public void resetPID() {
-    PID.reset(inputs.encoderValue, 0);
+    
   }
 
   // public void setVoltage(double voltage) {
@@ -177,12 +223,12 @@ public class Elevator extends SubsystemBase {
   // }
 
   public double getEncoderPosition() {
-    return inputs.encoderValue;
+    return inputs.thruBoreValue;
     // return ELEVATOR_ENCODER.getPosition();
   }
 
   public void zeroEncoder() {
-    io.setEncoderPosition(0);
+    io.zeroEncoder();
   }
 
   // public Command quasRoutine(SysIdRoutine.Direction direction) {
