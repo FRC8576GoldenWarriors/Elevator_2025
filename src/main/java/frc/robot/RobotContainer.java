@@ -16,7 +16,7 @@ import frc.robot.Subsystems.ElevatorIOSparkMax;
 public class RobotContainer {
   public static final Elevator elevator = new Elevator(new ElevatorIOSparkMax());
   public static final CommandXboxController DRIVE_CONTROLLER = new CommandXboxController(0);
-  
+
   public RobotContainer() {
   
     configureBindings();
@@ -25,10 +25,10 @@ public class RobotContainer {
   private void configureBindings() {
     // Regular Commands
     DRIVE_CONTROLLER.a().onTrue(new InstantCommand(()->elevator.setWantedLevel(levels.L1),elevator));
-    DRIVE_CONTROLLER.x().onTrue(new ElevatorMove(elevator, levels.L2));
+    DRIVE_CONTROLLER.x().onTrue(new InstantCommand(()->elevator.setWantedLevel(levels.L2),elevator));
     DRIVE_CONTROLLER.povUp().onTrue(new InstantCommand(()->elevator.zeroEncoder()));
-    DRIVE_CONTROLLER.y().onTrue(new ElevatorMove(elevator, levels.L3));
-    DRIVE_CONTROLLER.b().onTrue(new ElevatorMove(elevator,levels.L4));
+    DRIVE_CONTROLLER.y().onTrue(new InstantCommand(()->elevator.setWantedLevel(levels.L3),elevator));
+    DRIVE_CONTROLLER.b().onTrue(new InstantCommand(()->elevator.setWantedLevel(levels.L4),elevator));
     DRIVE_CONTROLLER.povDown().whileTrue(new InstantCommand(()-> elevator.setWantedLevel(levels.VoltageControl), elevator));
     DRIVE_CONTROLLER.povLeft().whileTrue(new InstantCommand(()-> elevator.setWantedLevel(levels.VoltageControl), elevator));
 

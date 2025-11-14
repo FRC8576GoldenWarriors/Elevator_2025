@@ -24,6 +24,8 @@ import java.awt.dnd.DragGestureEvent;
 import java.time.chrono.ThaiBuddhistChronology;
 
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class Elevator extends SubsystemBase {
   /** Creates a new Elevator. */
@@ -58,6 +60,10 @@ public class Elevator extends SubsystemBase {
   // private double wantedPosition;
   private double currentPosition;
 
+  LoggedNetworkNumber kP = new LoggedNetworkNumber("Elevator kP", Constants.ElevatorConstants.kP);
+  LoggedNetworkNumber kI = new LoggedNetworkNumber("Elevator kI", Constants.ElevatorConstants.kI);
+  LoggedNetworkNumber kD = new LoggedNetworkNumber("Elevator kD", Constants.ElevatorConstants.kD);
+  
   // private levels currentLevel = levels.Idle;
   private levels wantedLevel = levels.Idle;
   public SysIdRoutine routine = new SysIdRoutine(new SysIdRoutine.Config(
@@ -105,34 +111,51 @@ public class Elevator extends SubsystemBase {
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("Elevator", inputs);
+    PID.setPID(kP.get(),kI.get(),kD.get());
     currentPosition = inputs.thruBoreValue;
     // prevent elevator from moving after instantiated
-    if ((getEncoderPosition()<4000||!getTopSensor())&&wantedLevel!=levels.Zero&&DriverStation.isEnabled()&&wantedLevel!=levels.VoltageControl) {
+    if (wantedLevel!=levels.Zero&&DriverStation.isEnabled()&&wantedLevel!=levels.VoltageControl) {
       switch(wantedLevel){
         case L1:
-          if(Math.abs(Constants.ElevatorConstants.L1Position-currentPosition)<50)
-          PID.setP(0.03);//0.01
+          if(Math.abs(Constants.ElevatorConstants.L1Position-currentPosition)<50){
+          PID.setP(0.0008);//0.003//0.01
+          }
+          else{
+            PID.setP(Constants.ElevatorConstants.kP);
+          }
           PID_Voltage = PID.calculate(currentPosition,Constants.ElevatorConstants.L1Position);
           Logger.recordOutput("Goal Position", Constants.ElevatorConstants.L1Position);
           FF_Voltage = FEED_FORWARD.calculate(10, 15);
           break;
         case L2:
-        if(Math.abs(Constants.ElevatorConstants.L2Position-currentPosition)<50)
-          PID.setP(0.03);
+        if(Math.abs(Constants.ElevatorConstants.L2Position-currentPosition)<50){
+          PID.setP(0.0008);
+        }
+        else{
+          PID.setP(Constants.ElevatorConstants.kP);
+        }
           PID_Voltage = PID.calculate(currentPosition,Constants.ElevatorConstants.L2Position);
           Logger.recordOutput("Goal Position", Constants.ElevatorConstants.L2Position);
           FF_Voltage = FEED_FORWARD.calculate(10, 15);
           break;
         case L3:
-        if(Math.abs(Constants.ElevatorConstants.L3Position-currentPosition)<50)
-          PID.setP(0.03);
+        if(Math.abs(Constants.ElevatorConstants.L3Position-currentPosition)<50){
+          PID.setP(0.0008);
+        }
+        else{
+          PID.setP(Constants.ElevatorConstants.kP);
+        }
           PID_Voltage = PID.calculate(currentPosition,Constants.ElevatorConstants.L3Position);
           Logger.recordOutput("Goal Position", Constants.ElevatorConstants.L3Position);
           FF_Voltage = FEED_FORWARD.calculate(10, 15);
           break;
         case L4:
-        if(Math.abs(Constants.ElevatorConstants.L4Position-currentPosition)<50)
-          PID.setP(0.03);
+        if(Math.abs(Constants.ElevatorConstants.L4Position-currentPosition)<50){
+          PID.setP(0.0008);
+        }
+        else{
+          PID.setP(Constants.ElevatorConstants.kP);
+        }
           PID_Voltage = PID.calculate(currentPosition,Constants.ElevatorConstants.L4Position);
           Logger.recordOutput("Goal Position", Constants.ElevatorConstants.L4Position);
           FF_Voltage = FEED_FORWARD.calculate(10, 15);
@@ -180,6 +203,7 @@ public class Elevator extends SubsystemBase {
       wantedLevel = levels.Idle;
     }
     }
+    Logger.recordOutput("Elevator/Wanted Postiion",wantedLevel);
   }
 
   // public void setWantedPosition(double position) {

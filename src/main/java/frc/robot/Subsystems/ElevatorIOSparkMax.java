@@ -1,5 +1,6 @@
 package frc.robot.Subsystems;
 
+import com.revrobotics.REVLibError;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -16,11 +17,13 @@ public class ElevatorIOSparkMax implements ElevatorIO {
   private final DigitalInput topSensor;
   private final DigitalInput bottomSensor;
   private final Encoder thruBore;
+  REVLibError motorError;
 
   public ElevatorIOSparkMax() {
     elevator_Motor =
         new WarriorSparkMax(
-            Constants.ElevatorConstants.SPARK_MAX_ID, MotorType.kBrushless, false, IdleMode.kCoast);
+            Constants.ElevatorConstants.SPARK_MAX_ID, MotorType.kBrushless, false, IdleMode.kCoast,60);
+            
     topSensor = new DigitalInput(Constants.ElevatorConstants.TOP_SENSOR_ID);
     bottomSensor = new DigitalInput(Constants.ElevatorConstants.BOTTOM_SENSOR_ID);
     thruBore = new Encoder(4,3);

@@ -9,7 +9,7 @@
 // public class Macros {
 //     public static SequentialCommandGroup elevatorReset(Elevator elevator){
 //         return new SequentialCommandGroup(
-//             new StartEndCommand(()->elevator.setSpeed(-.7), ()->elevator.setSpeed(0), elevator).until(()->elevator.getBottomSensor()),
+//             new StartEndCommand(()->elevator.setWantedLevel(-.7), ()->elevator.setSpeed(0), elevator).until(()->elevator.getBottomSensor()),
 //             new WaitCommand(0.1),
 //             new StartEndCommand(()->elevator.setSpeed(0), ()->elevator.setSpeed(0), elevator).withTimeout(0.1),
 //             new InstantCommand(()->elevator.zeroEncoder())

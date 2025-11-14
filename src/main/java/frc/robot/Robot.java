@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Commands.ElevatorMove;
 import frc.robot.Subsystems.Elevator.levels;
 
@@ -90,9 +91,10 @@ public class Robot extends LoggedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
-    // if (!RobotContainer.elevator.getBottomSensor()) {
-    // new ElevatorMove(RobotContainer.elevator, levels.Zero).schedule();
-    // }
+    if (!RobotContainer.elevator.getBottomSensor()) {
+    new ElevatorMove(RobotContainer.elevator, levels.Zero).schedule();
+    }
+    new WaitCommand(1).andThen(()->RobotContainer.elevator.zeroEncoder()).schedule();
     // if (!RobotContainer.elevator.getBottomSensor()) {
     //   Macros.elevatorReset(RobotContainer.elevator).schedule();
     // }
