@@ -60,9 +60,9 @@ public class Elevator extends SubsystemBase {
   // private double wantedPosition;
   private double currentPosition;
 
-  LoggedNetworkNumber kP = new LoggedNetworkNumber("Elevator kP", Constants.ElevatorConstants.kP);
-  LoggedNetworkNumber kI = new LoggedNetworkNumber("Elevator kI", Constants.ElevatorConstants.kI);
-  LoggedNetworkNumber kD = new LoggedNetworkNumber("Elevator kD", Constants.ElevatorConstants.kD);
+  LoggedNetworkNumber kP = new LoggedNetworkNumber("Tuning/Elevator kP", Constants.ElevatorConstants.kP);
+  LoggedNetworkNumber kI = new LoggedNetworkNumber("Tuning/Elevator kI", Constants.ElevatorConstants.kI);
+  LoggedNetworkNumber kD = new LoggedNetworkNumber("Tuning/Elevator kD", Constants.ElevatorConstants.kD);
   
   // private levels currentLevel = levels.Idle;
   private levels wantedLevel = levels.Idle;
@@ -117,8 +117,8 @@ public class Elevator extends SubsystemBase {
     if (wantedLevel!=levels.Zero&&DriverStation.isEnabled()&&wantedLevel!=levels.VoltageControl) {
       switch(wantedLevel){
         case L1:
-          if(Math.abs(Constants.ElevatorConstants.L1Position-currentPosition)<50){
-          PID.setP(0.0008);//0.003//0.01
+          if(Math.abs(Constants.ElevatorConstants.L1Position-currentPosition)<75){
+          PID.setP(0.004);//0.008//0.003//0.01
           }
           else{
             PID.setP(Constants.ElevatorConstants.kP);

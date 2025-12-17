@@ -81,4 +81,8 @@ public class WarriorSparkMax extends SparkMax {
     config.closedLoop.outputRange(minOutput, maxOutput);
     this.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
+  public void follow(int id){
+    config.follow(id);
+    this.configure(config,ResetMode.kResetSafeParameters,PersistMode.kPersistParameters);
+  }
 }
