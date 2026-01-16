@@ -7,6 +7,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Commands.ElevatorMove;
 import frc.robot.Subsystems.Elevator;
@@ -24,14 +25,25 @@ public class RobotContainer {
 
   private void configureBindings() {
     // Regular Commands
-    DRIVE_CONTROLLER.a().onTrue(new InstantCommand(()->elevator.setWantedLevel(levels.L1),elevator));
-    DRIVE_CONTROLLER.x().onTrue(new InstantCommand(()->elevator.setWantedLevel(levels.L2),elevator));
-    DRIVE_CONTROLLER.povUp().onTrue(new InstantCommand(()->elevator.zeroEncoder()));
-    DRIVE_CONTROLLER.y().onTrue(new InstantCommand(()->elevator.setWantedLevel(levels.L3),elevator));
-    DRIVE_CONTROLLER.b().onTrue(new InstantCommand(()->elevator.setWantedLevel(levels.L4),elevator));
-    DRIVE_CONTROLLER.povDown().whileTrue(new InstantCommand(()-> elevator.setWantedLevel(levels.VoltageControl), elevator));
+
+    
+    // DRIVE_CONTROLLER.a().onTrue(new SequentialCommandGroup(new InstantCommand(()->elevator.resetPID(), elevator), new InstantCommand(()->elevator.setWantedLevel(levels.L1),elevator)));
+    // DRIVE_CONTROLLER.x().onTrue(new SequentialCommandGroup(new InstantCommand(()->elevator.resetPID(), elevator),new InstantCommand(()->elevator.setWantedLevel(levels.L2),elevator)));
+    // DRIVE_CONTROLLER.povUp().onTrue(new SequentialCommandGroup(new InstantCommand(()->elevator.resetPID(), elevator),new InstantCommand(()->elevator.zeroEncoder())));
+    // DRIVE_CONTROLLER.y().onTrue(new SequentialCommandGroup(new InstantCommand(()->elevator.resetPID(), elevator),new InstantCommand(()->elevator.setWantedLevel(levels.L3),elevator)));
+    // DRIVE_CONTROLLER.b().onTrue(new SequentialCommandGroup(new InstantCommand(()->elevator.resetPID(), elevator),new InstantCommand(()->elevator.setWantedLevel(levels.L4),elevator)));
+    // DRIVE_CONTROLLER.povDown().whileTrue(new InstantCommand(()-> elevator.setWantedLevel(levels.VoltageControl), elevator));
     DRIVE_CONTROLLER.povLeft().whileTrue(new InstantCommand(()-> elevator.setWantedLevel(levels.VoltageControl), elevator));
 
+    DRIVE_CONTROLLER.a().onTrue(elevator(levels.L1));
+    DRIVE_CONTROLLER.x().onTrue(elevator(levels.L2));
+
+    DRIVE_CONTROLLER.povUp().onTrue(new InstantCommand(()->elevator.zeroEncoder()));
+
+    DRIVE_CONTROLLER.y().onTrue(elevator(levels.L3));
+    DRIVE_CONTROLLER.b().onTrue(elevator(levels.L4));
+    
+    DRIVE_CONTROLLER.povDown().whileTrue(new InstantCommand(()-> elevator.setWantedLevel(levels.VoltageControl), elevator));
     
     // DRIVE_CONTROLLER.a().onTrue(Commands.sequence(new InstantCommand(()->elevator.resetPID()),new InstantCommand(()->elevator.setWantedLevel(levels.L1))));
     // DRIVE_CONTROLLER.x().onTrue(new InstantCommand(()->elevator.setWantedLevel(levels.L2)));
@@ -44,7 +56,9 @@ public class RobotContainer {
     // DRIVE_CONTROLLER.b().whileTrue(elevator.IDDynamic(Direction.kReverse));
     // DRIVE_CONTROLLER.povDown().whileTrue(new StartEndCommand(()->elevator.setSpeed(-.1),()->elevator.setSpeed(0),elevator));
   }
-
+  public SequentialCommandGroup elevator(levels level){
+    return new SequentialCommandGroup(new InstantCommand(()->elevator.resetPID(), elevator), new InstantCommand(()->elevator.setWantedLevel(level),elevator) );
+  }
   public Command getAutonomousCommand() {
     return Commands.print("No autonomous command configured");
   }

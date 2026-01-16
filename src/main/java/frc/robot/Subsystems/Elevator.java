@@ -4,27 +4,20 @@
 
 package frc.robot.Subsystems;
 
+import static edu.wpi.first.units.Units.Volts;
+
 import edu.wpi.first.math.controller.ElevatorFeedforward;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
-
-import static edu.wpi.first.units.Units.Volt;
-import static edu.wpi.first.units.Units.Volts;
-
-import java.awt.dnd.DragGestureEvent;
-import java.time.chrono.ThaiBuddhistChronology;
+import frc.robot.Constants.ElevatorConstants;
 
 import org.littletonrobotics.junction.Logger;
-import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class Elevator extends SubsystemBase {
@@ -39,7 +32,7 @@ public class Elevator extends SubsystemBase {
   //         new SysIdRoutine.Mechanism((voltage) -> this.setVoltage(voltage.in(Volts)), null,
   // this));
 
-  public enum levels{
+  public enum levels {
     L1,
     L2,
     L3,
@@ -48,28 +41,34 @@ public class Elevator extends SubsystemBase {
     Zero,
     VoltageControl
   }
+
   private ElevatorIO io;
-  
+
   private double PID_Voltage;
   private double FF_Voltage;
   private double Input_Voltage;
-  private PIDController PID;
+  private ProfiledPIDController PID;
   private ElevatorFeedforward FEED_FORWARD;
   private ElevatorIOInputsAutoLogged inputs = new ElevatorIOInputsAutoLogged();
 
   // private double wantedPosition;
   private double currentPosition;
 
-  LoggedNetworkNumber kP = new LoggedNetworkNumber("Tuning/Elevator kP", Constants.ElevatorConstants.kP);
-  LoggedNetworkNumber kI = new LoggedNetworkNumber("Tuning/Elevator kI", Constants.ElevatorConstants.kI);
-  LoggedNetworkNumber kD = new LoggedNetworkNumber("Tuning/Elevator kD", Constants.ElevatorConstants.kD);
-  
+  LoggedNetworkNumber kP =
+      new LoggedNetworkNumber("Tuning/Elevator kP", Constants.ElevatorConstants.kP);
+  LoggedNetworkNumber kI =
+      new LoggedNetworkNumber("Tuning/Elevator kI", Constants.ElevatorConstants.kI);
+  LoggedNetworkNumber kD =
+      new LoggedNetworkNumber("Tuning/Elevator kD", Constants.ElevatorConstants.kD);
+
   // private levels currentLevel = levels.Idle;
   private levels wantedLevel = levels.Idle;
-  public SysIdRoutine routine = new SysIdRoutine(new SysIdRoutine.Config(
-    null,null,null,
-    (state)->Logger.recordOutput("SysIdState",state.toString())
-  ), new SysIdRoutine.Mechanism((voltage)->io.setVoltage(voltage.in(Volts)), null, this));
+  public SysIdRoutine routine =
+      new SysIdRoutine(
+          new SysIdRoutine.Config(
+              null, null, null, (state) -> Logger.recordOutput("SysIdState", state.toString())),
+          new SysIdRoutine.Mechanism((voltage) -> io.setVoltage(voltage.in(Volts)), null, this));
+
   // var sysIdRoutine = new SysIdRoutine(
   //   new SysIdRoutine.Config(
   //     null, null, null, // Use default config
@@ -90,12 +89,13 @@ public class Elevator extends SubsystemBase {
     // IdleMode.kCoast);
     // ELEVATOR_ENCODER = ELEVATOR_MOTOR.getEncoder();
     PID =
-        new PIDController(
+        new ProfiledPIDController(
             Constants.ElevatorConstants.kP,
             Constants.ElevatorConstants.kI,
-            Constants.ElevatorConstants.kD);//(400, 500));
+            Constants.ElevatorConstants.kD,
+            new Constraints(35000.0, 425000.0)); // (400, 500));
     PID.setTolerance(50);
-    
+
     FEED_FORWARD =
         new ElevatorFeedforward(
             Constants.ElevatorConstants.kS,
@@ -111,52 +111,51 @@ public class Elevator extends SubsystemBase {
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("Elevator", inputs);
-    PID.setPID(kP.get(),kI.get(),kD.get());
+    PID.setPID(kP.get(), kI.get(), kD.get());
     currentPosition = inputs.thruBoreValue;
     // prevent elevator from moving after instantiated
-    if (wantedLevel!=levels.Zero&&DriverStation.isEnabled()&&wantedLevel!=levels.VoltageControl) {
-      switch(wantedLevel){
+    if (wantedLevel != levels.Zero
+        && DriverStation.isEnabled()
+        && wantedLevel != levels.VoltageControl) {
+      switch (wantedLevel) {
         case L1:
-          if(Math.abs(Constants.ElevatorConstants.L1Position-currentPosition)<75){
-          PID.setP(0.004);//0.008//0.003//0.01
-          }
-          else{
+          
+          if (Math.abs(Constants.ElevatorConstants.L1Position - currentPosition) < 75) {
+            PID.setP(0.004); // 0.008//0.003//0.01
+          } else {
             PID.setP(Constants.ElevatorConstants.kP);
           }
-          PID_Voltage = PID.calculate(currentPosition,Constants.ElevatorConstants.L1Position);
+          PID_Voltage = PID.calculate(currentPosition, Constants.ElevatorConstants.L1Position);
           Logger.recordOutput("Goal Position", Constants.ElevatorConstants.L1Position);
           FF_Voltage = FEED_FORWARD.calculate(10, 15);
           break;
         case L2:
-        if(Math.abs(Constants.ElevatorConstants.L2Position-currentPosition)<50){
-          PID.setP(0.0008);
-        }
-        else{
-          PID.setP(Constants.ElevatorConstants.kP);
-        }
-          PID_Voltage = PID.calculate(currentPosition,Constants.ElevatorConstants.L2Position);
+          if (Math.abs(Constants.ElevatorConstants.L2Position - currentPosition) < 50) {
+            PID.setP(0.0008);
+          } else {
+            PID.setP(Constants.ElevatorConstants.kP);
+          }
+          PID_Voltage = PID.calculate(currentPosition, Constants.ElevatorConstants.L2Position);
           Logger.recordOutput("Goal Position", Constants.ElevatorConstants.L2Position);
           FF_Voltage = FEED_FORWARD.calculate(10, 15);
           break;
         case L3:
-        if(Math.abs(Constants.ElevatorConstants.L3Position-currentPosition)<50){
-          PID.setP(0.0008);
-        }
-        else{
-          PID.setP(Constants.ElevatorConstants.kP);
-        }
-          PID_Voltage = PID.calculate(currentPosition,Constants.ElevatorConstants.L3Position);
+          if (Math.abs(Constants.ElevatorConstants.L3Position - currentPosition) < 50) {
+            PID.setP(0.0008);
+          } else {
+            PID.setP(Constants.ElevatorConstants.kP);
+          }
+          PID_Voltage = PID.calculate(currentPosition, Constants.ElevatorConstants.L3Position);
           Logger.recordOutput("Goal Position", Constants.ElevatorConstants.L3Position);
           FF_Voltage = FEED_FORWARD.calculate(10, 15);
           break;
         case L4:
-        if(Math.abs(Constants.ElevatorConstants.L4Position-currentPosition)<50){
-          PID.setP(0.0008);
-        }
-        else{
-          PID.setP(Constants.ElevatorConstants.kP);
-        }
-          PID_Voltage = PID.calculate(currentPosition,Constants.ElevatorConstants.L4Position);
+          if (Math.abs(Constants.ElevatorConstants.L4Position - currentPosition) < 50) {
+            PID.setP(0.0008);
+          } else {
+            PID.setP(Constants.ElevatorConstants.kP);
+          }
+          PID_Voltage = PID.calculate(currentPosition, Constants.ElevatorConstants.L4Position);
           Logger.recordOutput("Goal Position", Constants.ElevatorConstants.L4Position);
           FF_Voltage = FEED_FORWARD.calculate(10, 15);
           break;
@@ -164,59 +163,53 @@ public class Elevator extends SubsystemBase {
           PID_Voltage = 0;
           FF_Voltage = 0;
           break;
-        
       }
       Logger.recordOutput("PID Voltage", PID_Voltage);
       Logger.recordOutput("FF Voltage", FF_Voltage);
-      
+
       // PID_Voltage = PID.calculate(currentPosition, wantedPosition);
       Input_Voltage = PID_Voltage + FF_Voltage;
       Logger.recordOutput("Input Voltage", Input_Voltage);
-      Logger.recordOutput("Wanted State",wantedLevel);
+      Logger.recordOutput("Wanted State", wantedLevel);
       io.setVoltage(Input_Voltage);
-    } 
-    else{
-      if(wantedLevel==levels.VoltageControl){
-        
-          if(RobotContainer.DRIVE_CONTROLLER.povLeft().getAsBoolean()) {
-            io.setSpeed(0.3);
-          }
+    } else {
+      if (wantedLevel == levels.VoltageControl) {
 
-          else if(RobotContainer.DRIVE_CONTROLLER.povDown().getAsBoolean()) {
-            io.setSpeed(-0.3);
-          }
-          else{
-            io.setSpeed(0);
-          }
-
-
+        if (RobotContainer.DRIVE_CONTROLLER.povLeft().getAsBoolean()) {
+          io.setSpeed(0.3);
+        } else if (RobotContainer.DRIVE_CONTROLLER.povDown().getAsBoolean()) {
+          io.setSpeed(-0.3);
+        } else {
+          io.setSpeed(0);
+        }
       }
-      if(wantedLevel==levels.Zero){
-      io.setSpeed(-0.2);
-      if(inputs.Bottom_Sensor_Value){
-        io.setSpeed(0);
-        zeroEncoder();
+      if (wantedLevel == levels.Zero) {
+        io.setSpeed(-0.2);
+        if (inputs.Bottom_Sensor_Value) {
+          io.setSpeed(0);
+          zeroEncoder();
+          wantedLevel = levels.Idle;
+        }
+      }
+      if (DriverStation.isDisabled()) {
         wantedLevel = levels.Idle;
       }
     }
-    if(DriverStation.isDisabled()){
-      wantedLevel = levels.Idle;
-    }
-    }
-    Logger.recordOutput("Elevator/Wanted Postiion",wantedLevel);
+    Logger.recordOutput("Elevator/Wanted Postiion", wantedLevel);
+    Logger.recordOutput("Elevator/L4 Target Feet", ElevatorConstants.L4Position);
+
   }
 
   // public void setWantedPosition(double position) {
   //   wantedPosition = position; // rotations
   // }
-  public void setWantedLevel(levels level){
-    resetPID();
+  public void setWantedLevel(levels level) {
     wantedLevel = level;
   }
 
   public void resetPID() {
-    
-  }
+    PID.reset(currentPosition, 0);
+  } 
 
   // public void setVoltage(double voltage) {
   //   ELEVATOR_MOTOR.setVoltage(voltage);
@@ -226,7 +219,6 @@ public class Elevator extends SubsystemBase {
   //   ELEVATOR_MOTOR.set(speed);
   // }
 
- 
   public double getVoltage() {
     return inputs.motorVoltage;
     // return ELEVATOR_MOTOR.getAppliedOutput();
@@ -266,13 +258,14 @@ public class Elevator extends SubsystemBase {
   public double getVelocity() {
     return inputs.motorVelocity;
   }
-  public Command IDqualatistic(SysIdRoutine.Direction direction){
+
+  public Command IDqualatistic(SysIdRoutine.Direction direction) {
     return routine.quasistatic(direction);
   }
-  public Command IDDynamic(SysIdRoutine.Direction direction){
+
+  public Command IDDynamic(SysIdRoutine.Direction direction) {
     return routine.dynamic(direction);
   }
-
 
   // @Override
   // public void periodic() {

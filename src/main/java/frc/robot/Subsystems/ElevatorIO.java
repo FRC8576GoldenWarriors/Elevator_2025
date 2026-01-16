@@ -21,6 +21,8 @@ public interface ElevatorIO {
   }
 
   default void setVoltage(double voltage) {}
-  default void zeroEncoder(){}
-  default void setSpeed(double speed){}
+
+  default void zeroEncoder() {}
+
+  default void setSpeed(double speed) {}
 }

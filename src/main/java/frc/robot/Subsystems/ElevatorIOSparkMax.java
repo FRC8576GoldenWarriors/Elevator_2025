@@ -1,13 +1,9 @@
 package frc.robot.Subsystems;
 
 import com.revrobotics.REVLibError;
-import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.DigitalOutput;
-import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Encoder;
 import frc.lib.drivers.WarriorSparkMax;
 import frc.robot.Constants;
@@ -23,15 +19,24 @@ public class ElevatorIOSparkMax implements ElevatorIO {
   public ElevatorIOSparkMax() {
     elevator_Motor_1 =
         new WarriorSparkMax(
-            Constants.ElevatorConstants.SPARK_MAX_ID_1, MotorType.kBrushless, false, IdleMode.kCoast,60);
-    elevator_Motor_2 = new WarriorSparkMax(Constants.ElevatorConstants.SPARK_MAX_ID_2, MotorType.kBrushless, true, IdleMode.kCoast,60);
+            Constants.ElevatorConstants.SPARK_MAX_ID_1,
+            MotorType.kBrushless,
+            false,
+            IdleMode.kCoast,
+            60);
+    elevator_Motor_2 =
+        new WarriorSparkMax(
+            Constants.ElevatorConstants.SPARK_MAX_ID_2,
+            MotorType.kBrushless,
+            true,
+            IdleMode.kCoast,
+            60);
     // elevator_Motor_2.follow(Constants.ElevatorConstants.SPARK_MAX_ID_1);
-    
+
     topSensor = new DigitalInput(Constants.ElevatorConstants.TOP_SENSOR_ID);
     bottomSensor = new DigitalInput(Constants.ElevatorConstants.BOTTOM_SENSOR_ID);
-    thruBore = new Encoder(4,3,true);
+    thruBore = new Encoder(4, 3, true);
     thruBore.setDistancePerPulse(1);
-    
   }
 
   @Override
@@ -47,7 +52,6 @@ public class ElevatorIOSparkMax implements ElevatorIO {
     inputs.thruBoreVelocity = thruBore.getRate();
     inputs.motorCurrent = elevator_Motor_1.getOutputCurrent();
     inputs.motorCurrent2 = elevator_Motor_2.getOutputCurrent();
-
   }
 
   @Override
@@ -55,15 +59,15 @@ public class ElevatorIOSparkMax implements ElevatorIO {
     elevator_Motor_1.setVoltage(voltage);
     elevator_Motor_2.setVoltage(voltage);
   }
+
   @Override
-  public void zeroEncoder(){
+  public void zeroEncoder() {
     thruBore.reset();
   }
+
   @Override
-  public void setSpeed(double speed){
+  public void setSpeed(double speed) {
     elevator_Motor_1.set(speed);
     elevator_Motor_2.set(speed);
   }
-
-  
 }

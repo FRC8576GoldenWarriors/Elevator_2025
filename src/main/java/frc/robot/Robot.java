@@ -4,7 +4,6 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -12,7 +11,6 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Commands.ElevatorMove;
 import frc.robot.Subsystems.Elevator.levels;
-
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
@@ -53,7 +51,7 @@ public class Robot extends LoggedRobot {
     // be added.
     // DataLogManager.start();
     // URCL.start();
-    //RobotContainer.elevator.zeroEncoder();
+    // RobotContainer.elevator.zeroEncoder();
   }
 
   @Override
@@ -92,9 +90,9 @@ public class Robot extends LoggedRobot {
       m_autonomousCommand.cancel();
     }
     if (!RobotContainer.elevator.getBottomSensor()) {
-    new ElevatorMove(RobotContainer.elevator, levels.Zero).schedule();
+      new ElevatorMove(RobotContainer.elevator, levels.Zero).schedule();
     }
-    new WaitCommand(1).andThen(()->RobotContainer.elevator.zeroEncoder()).schedule();
+    new WaitCommand(1).andThen(() -> RobotContainer.elevator.zeroEncoder()).schedule();
     // if (!RobotContainer.elevator.getBottomSensor()) {
     //   Macros.elevatorReset(RobotContainer.elevator).schedule();
     // }
