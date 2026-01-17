@@ -7,7 +7,7 @@ public class Constants {
     public static final int SPARK_MAX_ID_1 = 11;
     public static final int SPARK_MAX_ID_2 = 10;
     public static final double kP =
-        0.004; // 0.008//0.0056;//0.0048;//0.075;//12.8;//6.4;//3.2;//1;//4.8; //
+        0.004155; // 0.008//0.0056;//0.0048;//0.075;//12.8;//6.4;//3.2;//1;//4.8; //
     // 4.8//4.6;//4.65//4.0//0.5//4.8;//7.2, 4.8
     public static final double kI = 0.0;
     public static final double kD = 0.00004; // 0.03; // 0.04;//0.04//0.03;//0.01

@@ -13,7 +13,7 @@ import edu.wpi.first.wpilibj.Preferences;
 public class WarriorSparkMax extends SparkMax {
 
   private SparkMaxConfig config;
-
+  private SparkMaxConfig followConfig;
   public WarriorSparkMax(int deviceId, MotorType motorType, boolean inverted, IdleMode brakeMode) {
     super(deviceId, motorType);
     config = new SparkMaxConfig();
@@ -36,6 +36,26 @@ public class WarriorSparkMax extends SparkMax {
     String key = "Spark " + this.getDeviceId() + " Flashes";
     Preferences.setDouble(key, Preferences.getDouble(key, 0) + 1);
   }
+
+  public WarriorSparkMax(
+      int deviceId, MotorType motorType, boolean inverted, IdleMode brakeMode, int currentLimit, SparkMax followLeader) {
+    super(deviceId, motorType);
+    
+    config = new SparkMaxConfig();
+    config.inverted(inverted).idleMode(brakeMode).smartCurrentLimit(currentLimit);
+
+    followConfig = new SparkMaxConfig();
+    followConfig
+        .apply(config).follow(followLeader, inverted);
+
+    this.configure(followConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+    String key = "Spark " + this.getDeviceId() + " Flashes";
+    Preferences.setDouble(key, Preferences.getDouble(key, 0) + 1);
+  }
+
+  
+
 
   public void setInverted(boolean isInverted) {
     config.inverted(isInverted);

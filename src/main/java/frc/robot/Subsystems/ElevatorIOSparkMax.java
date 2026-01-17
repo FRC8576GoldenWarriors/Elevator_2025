@@ -11,12 +11,16 @@ import frc.robot.Constants;
 public class ElevatorIOSparkMax implements ElevatorIO {
   private final WarriorSparkMax elevator_Motor_1;
   private final WarriorSparkMax elevator_Motor_2;
+  //private final SparkMax elevator_Motor_2;
   private final DigitalInput topSensor;
   private final DigitalInput bottomSensor;
   private final Encoder thruBore;
+ // private SparkMaxConfig config;
   REVLibError motorError;
 
   public ElevatorIOSparkMax() {
+        //  config = new SparkMaxConfig();
+
     elevator_Motor_1 =
         new WarriorSparkMax(
             Constants.ElevatorConstants.SPARK_MAX_ID_1,
@@ -30,8 +34,14 @@ public class ElevatorIOSparkMax implements ElevatorIO {
             MotorType.kBrushless,
             true,
             IdleMode.kCoast,
-            60);
-    // elevator_Motor_2.follow(Constants.ElevatorConstants.SPARK_MAX_ID_1);
+            60, elevator_Motor_1);
+    // elevator_Motor_2 = new SparkMax(Constants.ElevatorConstants.SPARK_MAX_ID_2, MotorType.kBrushless);
+    //   config.inverted(false);
+    //   config.smartCurrentLimit(60);
+    //   config.idleMode(IdleMode.kCoast);
+    //   config.follow(Constants.ElevatorConstants.SPARK_MAX_ID_1);
+
+    //  elevator_Motor_2.configure(config, com.revrobotics.ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     topSensor = new DigitalInput(Constants.ElevatorConstants.TOP_SENSOR_ID);
     bottomSensor = new DigitalInput(Constants.ElevatorConstants.BOTTOM_SENSOR_ID);
@@ -57,7 +67,7 @@ public class ElevatorIOSparkMax implements ElevatorIO {
   @Override
   public void setVoltage(double voltage) {
     elevator_Motor_1.setVoltage(voltage);
-    elevator_Motor_2.setVoltage(voltage);
+    //elevator_Motor_2.setVoltage(voltage);
   }
 
   @Override
@@ -68,6 +78,6 @@ public class ElevatorIOSparkMax implements ElevatorIO {
   @Override
   public void setSpeed(double speed) {
     elevator_Motor_1.set(speed);
-    elevator_Motor_2.set(speed);
+    //elevator_Motor_2.set(speed);
   }
 }

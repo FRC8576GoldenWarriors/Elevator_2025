@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.Commands.ElevatorMove;
 import frc.robot.Subsystems.Elevator;
 import frc.robot.Subsystems.Elevator.levels;
 import frc.robot.Subsystems.ElevatorIOSparkMax;
@@ -19,32 +18,32 @@ public class RobotContainer {
   public static final CommandXboxController DRIVE_CONTROLLER = new CommandXboxController(0);
 
   public RobotContainer() {
-  
+
     configureBindings();
   }
 
   private void configureBindings() {
     // Regular Commands
 
-    
+
     // DRIVE_CONTROLLER.a().onTrue(new SequentialCommandGroup(new InstantCommand(()->elevator.resetPID(), elevator), new InstantCommand(()->elevator.setWantedLevel(levels.L1),elevator)));
     // DRIVE_CONTROLLER.x().onTrue(new SequentialCommandGroup(new InstantCommand(()->elevator.resetPID(), elevator),new InstantCommand(()->elevator.setWantedLevel(levels.L2),elevator)));
     // DRIVE_CONTROLLER.povUp().onTrue(new SequentialCommandGroup(new InstantCommand(()->elevator.resetPID(), elevator),new InstantCommand(()->elevator.zeroEncoder())));
     // DRIVE_CONTROLLER.y().onTrue(new SequentialCommandGroup(new InstantCommand(()->elevator.resetPID(), elevator),new InstantCommand(()->elevator.setWantedLevel(levels.L3),elevator)));
     // DRIVE_CONTROLLER.b().onTrue(new SequentialCommandGroup(new InstantCommand(()->elevator.resetPID(), elevator),new InstantCommand(()->elevator.setWantedLevel(levels.L4),elevator)));
     // DRIVE_CONTROLLER.povDown().whileTrue(new InstantCommand(()-> elevator.setWantedLevel(levels.VoltageControl), elevator));
-    DRIVE_CONTROLLER.povLeft().whileTrue(new InstantCommand(()-> elevator.setWantedLevel(levels.VoltageControl), elevator));
+    DRIVE_CONTROLLER.rightBumper().whileTrue(new InstantCommand(()-> elevator.setWantedLevel(levels.VoltageControl), elevator));
 
-    DRIVE_CONTROLLER.a().onTrue(elevator(levels.L1));
-    DRIVE_CONTROLLER.x().onTrue(elevator(levels.L2));
+    // DRIVE_CONTROLLER.a().onTrue(elevator(levels.L1));
+    // DRIVE_CONTROLLER.x().onTrue(elevator(levels.L2));
 
     DRIVE_CONTROLLER.povUp().onTrue(new InstantCommand(()->elevator.zeroEncoder()));
 
-    DRIVE_CONTROLLER.y().onTrue(elevator(levels.L3));
-    DRIVE_CONTROLLER.b().onTrue(elevator(levels.L4));
-    
-    DRIVE_CONTROLLER.povDown().whileTrue(new InstantCommand(()-> elevator.setWantedLevel(levels.VoltageControl), elevator));
-    
+    //DRIVE_CONTROLLER.y().onTrue(elevator(levels.L3));
+    // DRIVE_CONTROLLER.b().onTrue(elevator(levels.L4));
+
+    DRIVE_CONTROLLER.leftBumper().whileTrue(new InstantCommand(()-> elevator.setWantedLevel(levels.VoltageControl), elevator));
+
     // DRIVE_CONTROLLER.a().onTrue(Commands.sequence(new InstantCommand(()->elevator.resetPID()),new InstantCommand(()->elevator.setWantedLevel(levels.L1))));
     // DRIVE_CONTROLLER.x().onTrue(new InstantCommand(()->elevator.setWantedLevel(levels.L2)));
     // DRIVE_CONTROLLER.y().onTrue(new InstantCommand(()->elevator.setWantedLevel(levels.L3)));

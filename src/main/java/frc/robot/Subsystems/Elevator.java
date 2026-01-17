@@ -119,7 +119,7 @@ public class Elevator extends SubsystemBase {
         && wantedLevel != levels.VoltageControl) {
       switch (wantedLevel) {
         case L1:
-          
+
           if (Math.abs(Constants.ElevatorConstants.L1Position - currentPosition) < 75) {
             PID.setP(0.004); // 0.008//0.003//0.01
           } else {
@@ -175,9 +175,9 @@ public class Elevator extends SubsystemBase {
     } else {
       if (wantedLevel == levels.VoltageControl) {
 
-        if (RobotContainer.DRIVE_CONTROLLER.povLeft().getAsBoolean()) {
+        if (RobotContainer.DRIVE_CONTROLLER.rightBumper().getAsBoolean()) {
           io.setSpeed(0.3);
-        } else if (RobotContainer.DRIVE_CONTROLLER.povDown().getAsBoolean()) {
+        } else if (RobotContainer.DRIVE_CONTROLLER.leftBumper().getAsBoolean()) {
           io.setSpeed(-0.3);
         } else {
           io.setSpeed(0);
@@ -209,7 +209,7 @@ public class Elevator extends SubsystemBase {
 
   public void resetPID() {
     PID.reset(currentPosition, 0);
-  } 
+  }
 
   // public void setVoltage(double voltage) {
   //   ELEVATOR_MOTOR.setVoltage(voltage);
